@@ -148,29 +148,28 @@ And('o campo "Phone" está preenchido de forma inválida', () => {
 })
 
 And('o campo "Inquiry" está preenchido de forma inválida', () => {
-    let inquiryTest = "teste"
-
+    let inquiryTest = "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus"
+    formato = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/;
     cy.preencherInformacoes(inquiryTest)
 
-    if(inquiryTest.length <= 500) {
-        cy.log("Inquiry possui menos que 500 caracteres")
-        cy.log("Fora do escopo do teste.")
-    }
-    else {
-        Then('o sistema deve informar a mensagem de erro "Campo Inquiry inválido."', () => {
-            cy.intercept('POST', '**/sendForms', {
-                statusCode: 412,
-                body: {
-                    "sucesso": false,
-                    "erro": "Campo Inquiry inválido."
-                }
-            }).as('enviadoComErro')
-
-            cy.get("button").click()
-            cy.wait('@enviadoComErro').its('response.body.sucesso').should('be.false')
-            cy.get('#Error').should('contain.text', "Campo Inquiry inválido.")
+    if(inquiryTest.length > 500 || formato.test(inquiryTest)) {
+        cy.log("Inquiry possui caracteres especiais ou mais que 500 caracteres")
+            Then('o sistema deve informar a mensagem de erro "Campo Inquiry inválido."', () => {
+                cy.intercept('POST', '**/sendForms', {
+                    statusCode: 412,
+                    body: {
+                        "sucesso": false,
+                        "erro": "Campo Inquiry inválido."
+                    }
+                }).as('enviadoComErro')
+    
+                cy.get("button").click()
+                cy.wait('@enviadoComErro').its('response.body.sucesso').should('be.false')
+                cy.get('#Error').should('contain.text', "Campo Inquiry inválido.")
         })
     }
+    else
+        cy.log("Fora do escopo do teste.")
 })
 
 Then("o sistema deve informar uma mensagem de sucesso", () => {
