@@ -22,7 +22,7 @@ When("submeto todos os campos com informações válidas", () => {
 And('o campo {string} está preenchido de forma inválida', (campo) => {
     switch (campo) {
         case 'Name':
-            let nomeTeste = "LETICIA SOARES*CASTILHO"
+            let nomeTeste = "LETICIA SOARES CASTILHO"
             //Utilizando regex para seguir com a formatação requisitada
             formato = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/;
             cy.preencherNome(nomeTeste)
@@ -53,7 +53,7 @@ And('o campo {string} está preenchido de forma inválida', (campo) => {
             break
 
         case 'Email':
-            let emailTeste = "leticiaskcastilho@.com"
+            let emailTeste = "leticiaskcastilho@gmail.com"
             //Utilizando regex para seguir com a formatação requisitada
             formato = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+[.][A-Za-z.]{2,}$/
             cy.preencherEmail(emailTeste)
@@ -84,7 +84,7 @@ And('o campo {string} está preenchido de forma inválida', (campo) => {
             break
 
         case 'Company':
-            let companyTeste = "PagBr&sil"
+            let companyTeste = "PagBrasil"
             //Utilizando regex para seguir com a formatação requisitada
             formato = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/;
             cy.preencherEmpresa(companyTeste)
@@ -115,7 +115,7 @@ And('o campo {string} está preenchido de forma inválida', (campo) => {
             break
 
         case 'Website':
-            let websiteTeste = "http:/teste.com"
+            let websiteTeste = "http://teste.com"
             //Utilizando regex para seguir com a formatação requisitada
             formato = /^(http:\/\/)[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/
             cy.preencherSite(websiteTeste)
@@ -145,7 +145,7 @@ And('o campo {string} está preenchido de forma inválida', (campo) => {
             })
             break
         case 'Phone':
-            let phone1 = "(51) 9358-2171"
+            let phone1 = "(51) 99358-2171"
             //Utilizando regex para seguir com a formatação requisitada
             formato = /^([(][1-9]{2}[)] )?[0-9]{5}[-]?[0-9]{4}$/;
             cy.preencherCelular(phone1)
@@ -176,14 +176,14 @@ And('o campo {string} está preenchido de forma inválida', (campo) => {
             break
 
         case 'Inquiry':
-            let inquiryTest = "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus"
+            let inquiryTest = "Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus"
             //Utilizando regex para seguir com a formatação requisitada
             formato = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/;
             cy.preencherInformacoes(inquiryTest)
 
             //Validação das regras descritas no documento para o campo "Inquiry"
             if (inquiryTest.length > 500 || formato.test(inquiryTest)) {
-                cy.log("Inquiry possui mais que 500 caracteres")
+                cy.log("Inquiry possui mais que 500 caracteres ou possui caracteres especiais")
                 campoInvalido = true
             } else
                 cy.log("Fora do escopo do teste.")
