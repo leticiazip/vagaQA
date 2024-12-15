@@ -1,175 +1,210 @@
 /// <reference types="cypress"/>
-import { Given, When, Then } from "cypress-cucumber-preprocessor/steps";
-import { faker } from '@faker-js/faker';
+import {Given, When, Then} from "cypress-cucumber-preprocessor/steps";
+import {faker} from '@faker-js/faker';
 
 let Nome = faker.name.firstName()
 let Email = faker.internet.email(Nome)
-let Empresa = faker.company.name()
+let Company = faker.company.name()
 let Website = faker.internet.url()
 let Phone = '(51) 99358-2171'
 let Inquiry = faker.lorem.lines(2)
+let campoInvalido = false
+let formato = null
 
 Given("que estou na página do formulário", () => {
     cy.visit("/form.html")
 })
 
 When("submeto todos os campos com informações válidas", () => {
-    cy.preencherTodosCampos(Nome, Email, Empresa, Website, Phone, Inquiry)
+    cy.preencherTodosCampos(Nome, Email, Company, Website, Phone, Inquiry)
 })
 
-And('o campo "Name" está preenchido de forma inválida', () => {
-    let nomeTeste = "LETICIA SOARES CASTILHO"
-    let formato = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/;
+And('o campo {string} está preenchido de forma inválida', (campo) => {
+    switch (campo) {
+        case 'Name':
+            let nomeTeste = "LETICIA SOARES*CASTILHO"
+            //Utilizando regex para seguir com a formatação requisitada
+            formato = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/;
+            cy.preencherNome(nomeTeste)
 
-    cy.preencherNome(nomeTeste)
+            //Validação das regras descritas no documento para o campo "Name"
+            if (nomeTeste.length > 255 || formato.test(nomeTeste)) {
+                cy.log('"Name" possui caracteres inválidos ou mais que 255 caracteres')
+                campoInvalido = true
+            } else
+                cy.log("Fora do escopo do teste.")
+            Then('o sistema deve informar a mensagem de erro {string}', (msgErro) => {
+                if (campoInvalido = true) {
+                    //Utilização do "cy.intercept()" para mockar o response da suposta requisição de envio do formulário
+                    cy.intercept('POST', '**/sendForms', {
+                        statusCode: 412,
+                        body: {
+                            "sucesso": false,
+                            "erro": msgErro
+                        }
+                    }).as('enviadoComErro')
 
-    if(nomeTeste.length > 255 || formato.test(nomeTeste)) {
-        cy.log('"Name" possui caracteres inválidos ou mais que 255 caracteres')
-
-            Then('o sistema deve informar a mensagem de erro "Campo Name inválido."', () => {
-                cy.intercept('POST', '**/sendForms', {
-                    statusCode: 412,
-                    body: {
-                        "sucesso": false,
-                        "erro": "Campo Name inválido."
-                    }
-                }).as('enviadoComErro')
-
-                cy.get("button").click()
-                cy.wait('@enviadoComErro').its('response.body.sucesso').should('be.false')
-                cy.get('#Error').should('contain.text', "Campo Name inválido.")
+                    cy.get("button").click()
+                    cy.wait('@enviadoComErro').its('response.body.sucesso').should('be.false')
+                    cy.get('#Error').should('contain.text', msgErro)
+                } else
+                    cy.log("Fora do escopo do teste.")
             })
-    }else
-        cy.log("Fora do escopo do teste.")
-})
+            break
 
-And('o campo "Email" está preenchido de forma inválida', () => {
-    let emailTeste = "leticiaskcastilho@gmail.com"
-    let formato = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+[.][A-Za-z.]{2,}$/
+        case 'Email':
+            let emailTeste = "leticiaskcastilho@.com"
+            //Utilizando regex para seguir com a formatação requisitada
+            formato = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+[.][A-Za-z.]{2,}$/
+            cy.preencherEmail(emailTeste)
 
-    cy.preencherEmail(emailTeste)
+            //Validação das regras descritas no documento para o campo "Email"
+            if (emailTeste.length > 150 || (formato.test(emailTeste) == false)) {
+                cy.log('"Email" não possui o padrão @domínio ou possui mais que 150 caracteres')
+                campoInvalido = true
+            } else
+                cy.log("Fora do escopo do teste.")
+            Then('o sistema deve informar a mensagem de erro {string}', (msgErro) => {
+                if (campoInvalido = true) {
+                    //Utilização do "cy.intercept()" para mockar o response da suposta requisição de envio do formulário
+                    cy.intercept('POST', '**/sendForms', {
+                        statusCode: 412,
+                        body: {
+                            "sucesso": false,
+                            "erro": msgErro
+                        }
+                    }).as('enviadoComErro')
 
-    if(emailTeste.length > 150 || formato.test(emailTeste) == false) {
-            cy.log('"Email" não possui o padrão @domínio ou possui mais que 150 caracteres')
-
-            Then('o sistema deve informar a mensagem de erro "Campo Email inválido."', () => {
-                cy.intercept('POST', '**/sendForms', {
-                    statusCode: 412,
-                    body: {
-                        "sucesso": false,
-                        "erro": "Campo Email inválido."
-                    }
-                }).as('enviadoComErro')
-
-                cy.get("button").click()
-                cy.wait('@enviadoComErro').its('response.body.sucesso').should('be.false')
-                cy.get('#Error').should('contain.text', "Campo Email inválido.")
+                    cy.get("button").click()
+                    cy.wait('@enviadoComErro').its('response.body.sucesso').should('be.false')
+                    cy.get('#Error').should('contain.text', msgErro)
+                } else
+                    cy.log("Fora do escopo do teste.")
             })
-        } else
-            cy.log("Fora do escopo do teste.")
-})
+            break
 
-And('o campo "Company" está preenchido de forma inválida', () => {
-    let companyTeste = "PagBrasil"
-    let formato = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/;
+        case 'Company':
+            let companyTeste = "PagBr&sil"
+            //Utilizando regex para seguir com a formatação requisitada
+            formato = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/;
+            cy.preencherEmpresa(companyTeste)
 
-    cy.preencherEmpresa(companyTeste)
+            //Validação das regras descritas no documento para o campo "Company"
+            if (companyTeste.length > 200 || formato.test(companyTeste)) {
+                cy.log('"Company" possui caracteres inválidos ou mais que 200 caracteres')
+                campoInvalido = true
+            } else
+                cy.log("Fora do escopo do teste.")
+            Then('o sistema deve informar a mensagem de erro {string}', (msgErro) => {
+                if (campoInvalido = true) {
+                    //Utilização do "cy.intercept()" para mockar o response da suposta requisição de envio do formulário
+                    cy.intercept('POST', '**/sendForms', {
+                        statusCode: 412,
+                        body: {
+                            "sucesso": false,
+                            "erro": msgErro
+                        }
+                    }).as('enviadoComErro')
 
-    if(companyTeste.length > 200 || formato.test(companyTeste)) {
-            cy.log('"Company" possui caracteres inválidos ou mais que 200 caracteres')
-
-            Then('o sistema deve informar a mensagem de erro "Campo Company inválido."', () => {
-                cy.intercept('POST', '**/sendForms', {
-                    statusCode: 412,
-                    body: {
-                        "sucesso": false,
-                        "erro": "Campo Company inválido."
-                    }
-                }).as('enviadoComErro')
-
-                cy.get("button").click()
-                cy.wait('@enviadoComErro').its('response.body.sucesso').should('be.false')
-                cy.get('#Error').should('contain.text', "Campo Company inválido.")
+                    cy.get("button").click()
+                    cy.wait('@enviadoComErro').its('response.body.sucesso').should('be.false')
+                    cy.get('#Error').should('contain.text', msgErro)
+                } else
+                    cy.log("Fora do escopo do teste.")
             })
-        } else
-            cy.log("Fora do escopo do teste.")
-})
+            break
 
-And('o campo "Website" está preenchido de forma inválida', () => {
-    let websiteTeste = "http://teste.com"
-    let formato = /^(http:\/\/)[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/
+        case 'Website':
+            let websiteTeste = "http:/teste.com"
+            //Utilizando regex para seguir com a formatação requisitada
+            formato = /^(http:\/\/)[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/
+            cy.preencherSite(websiteTeste)
 
-    cy.preencherSite(websiteTeste)
+            //Validação das regras descritas no documento para o campo "Website"
+            if (websiteTeste.length > 200 || formato.test(websiteTeste) == false) {
+                cy.log('"Website" não está no formato URL ou possui mais que 200 caracteres')
+                campoInvalido = true
+            } else
+                cy.log("Fora do escopo do teste.")
+            Then('o sistema deve informar a mensagem de erro {string}', (msgErro) => {
+                if (campoInvalido = true) {
+                    //Utilização do "cy.intercept()" para mockar o response da suposta requisição de envio do formulário
+                    cy.intercept('POST', '**/sendForms', {
+                        statusCode: 412,
+                        body: {
+                            "sucesso": false,
+                            "erro": msgErro
+                        }
+                    }).as('enviadoComErro')
 
-    if(websiteTeste.length > 200 || formato.test(websiteTeste) == false) {
-            cy.log('"Website" não está no formato URL ou possui mais que 200 caracteres')
-
-            Then('o sistema deve informar a mensagem de erro "Campo Website inválido."', () => {
-                cy.intercept('POST', '**/sendForms', {
-                    statusCode: 412,
-                    body: {
-                        "sucesso": false,
-                        "erro": "Campo Website inválido."
-                    }
-                }).as('enviadoComErro')
-
-                cy.get("button").click()
-                cy.wait('@enviadoComErro').its('response.body.sucesso').should('be.false')
-                cy.get('#Error').should('contain.text', "Campo Website inválido.")
+                    cy.get("button").click()
+                    cy.wait('@enviadoComErro').its('response.body.sucesso').should('be.false')
+                    cy.get('#Error').should('contain.text', msgErro)
+                } else
+                    cy.log("Fora do escopo do teste.")
             })
-        } else
-            cy.log("Fora do escopo do teste.")
-})
+            break
+        case 'Phone':
+            let phone1 = "(51) 9358-2171"
+            //Utilizando regex para seguir com a formatação requisitada
+            formato = /^([(][1-9]{2}[)] )?[0-9]{5}[-]?[0-9]{4}$/;
+            cy.preencherCelular(phone1)
 
-And('o campo "Phone" está preenchido de forma inválida', () => {
-    let phone1 = "(51) 99358-2171"
-    let format = /^([(][1-9]{2}[)] )?[0-9]{5}[-]?[0-9]{4}$/;
+            //Validação das regras descritas no documento para o campo "Phone"
+            if (phone1.length > 15 || formato.test(phone1) == false) {
+                cy.log('"Phone" não está no padrão brasileiro de telefone ou possui mais que 15 caracteres')
+                campoInvalido = true
+            } else
+                cy.log("Fora do escopo do teste.")
+            Then('o sistema deve informar a mensagem de erro {string}', (msgErro) => {
+                if (campoInvalido = true) {
+                    //Utilização do "cy.intercept()" para mockar o response da suposta requisição de envio do formulário
+                    cy.intercept('POST', '**/sendForms', {
+                        statusCode: 412,
+                        body: {
+                            "sucesso": false,
+                            "erro": msgErro
+                        }
+                    }).as('enviadoComErro')
 
-    cy.preencherCelular(phone1)
-
-    if(phone1.length > 15 || format.test(phone1) == false) {
-            cy.log('"Phone" não está no padrão brasileiro de telefone ou possui mais que 15 caracteres')
-
-            Then('o sistema deve informar a mensagem de erro "Campo Phone inválido."', () => {
-                cy.intercept('POST', '**/sendForms', {
-                    statusCode: 412,
-                    body: {
-                        "sucesso": false,
-                        "erro": "Campo Phone inválido."
-                    }
-                }).as('enviadoComErro')
-
-                cy.get("button").click()
-                cy.wait('@enviadoComErro').its('response.body.sucesso').should('be.false')
-                cy.get('#Error').should('contain.text', "Campo Phone inválido.")
+                    cy.get("button").click()
+                    cy.wait('@enviadoComErro').its('response.body.sucesso').should('be.false')
+                    cy.get('#Error').should('contain.text', msgErro)
+                } else
+                    cy.log("Fora do escopo do teste.")
             })
-        } else
-            cy.log("Fora do escopo do teste.")
-})
+            break
 
-And('o campo "Inquiry" está preenchido de forma inválida', () => {
-    let inquiryTest = "teste"
+        case 'Inquiry':
+            let inquiryTest = "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus"
+            //Utilizando regex para seguir com a formatação requisitada
+            formato = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/;
+            cy.preencherInformacoes(inquiryTest)
 
-    cy.preencherInformacoes(inquiryTest)
+            //Validação das regras descritas no documento para o campo "Inquiry"
+            if (inquiryTest.length > 500 || formato.test(inquiryTest)) {
+                cy.log("Inquiry possui mais que 500 caracteres")
+                campoInvalido = true
+            } else
+                cy.log("Fora do escopo do teste.")
+            Then('o sistema deve informar a mensagem de erro {string}', (msgErro) => {
+                if (campoInvalido = true) {
+                    //Utilização do "cy.intercept()" para mockar o response da suposta requisição de envio do formulário
+                    cy.intercept('POST', '**/sendForms', {
+                        statusCode: 412,
+                        body: {
+                            "sucesso": false,
+                            "erro": msgErro
+                        }
+                    }).as('enviadoComErro')
 
-    if(inquiryTest.length <= 500) {
-        cy.log("Inquiry possui menos que 500 caracteres")
-        cy.log("Fora do escopo do teste.")
-    }
-    else {
-        Then('o sistema deve informar a mensagem de erro "Campo Inquiry inválido."', () => {
-            cy.intercept('POST', '**/sendForms', {
-                statusCode: 412,
-                body: {
-                    "sucesso": false,
-                    "erro": "Campo Inquiry inválido."
-                }
-            }).as('enviadoComErro')
-
-            cy.get("button").click()
-            cy.wait('@enviadoComErro').its('response.body.sucesso').should('be.false')
-            cy.get('#Error').should('contain.text', "Campo Inquiry inválido.")
-        })
+                    cy.get("button").click()
+                    cy.wait('@enviadoComErro').its('response.body.sucesso').should('be.false')
+                    cy.get('#Error').should('contain.text', msgErro)
+                } else
+                    cy.log("Fora do escopo do teste.")
+            })
+            break
     }
 })
 
@@ -181,6 +216,6 @@ Then("o sistema deve informar uma mensagem de sucesso", () => {
         }
     }).as('envioComSucesso')
     cy.get("button").click()
-    cy.get('#successMessage').should('contain.text',"Form submitted successfully!")
+    cy.get('#successMessage').should('contain.text', "Form submitted successfully!")
     cy.wait('@envioComSucesso').its('response.body.sucesso').should('be.true')
 })

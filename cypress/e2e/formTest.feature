@@ -7,26 +7,15 @@ Feature: Enviar formulário
   Scenario: Enviar formulário com informações válidas
     Then o sistema deve informar uma mensagem de sucesso
 
-  Scenario: Enviar formulário com campo "Nome" inválido
-    And o campo "Name" está preenchido de forma inválida
-    Then o sistema deve informar a mensagem de erro "Campo Name inválido."
+  Scenario Outline: Enviar formulário com campo "<campo>" inválido
+    And o campo "<campo>" está preenchido de forma inválida
+    Then o sistema deve informar a mensagem de erro "<msgErro>"
 
-  Scenario: Enviar formulário com campo "Email" inválido
-    And o campo "Email" está preenchido de forma inválida
-    Then o sistema deve informar a mensagem de erro "Campo Email inválido."
-
-  Scenario: Enviar formulário com campo "Company" inválido
-    And o campo "Company" está preenchido de forma inválida
-    Then o sistema deve informar a mensagem de erro "Campo Company inválido."
-
-  Scenario: Enviar formulário com campo "Website" inválido
-    And o campo "Website" está preenchido de forma inválida
-    Then o sistema deve informar a mensagem de erro "Campo Website inválido."
-
-  Scenario: Enviar formulário com campo "Phone" inválido
-    And o campo "Phone" está preenchido de forma inválida
-    Then o sistema deve informar a mensagem de erro "Campo Phone inválido."
-
-  Scenario: Enviar formulário com campo "Inquiry" inválido
-    And o campo "Inquiry" está preenchido de forma inválida
-    Then o sistema deve informar a mensagem de erro "Campo Inquiry inválido."
+    Examples:
+      | campo    | msgErro                 |
+      | Name     | Campo Name inválido.    |
+      | Email    | Campo Email inválido.   |
+      | Company  | Campo Company inválido. |
+      | Website  | Campo Website inválido. |
+      | Phone    | Campo Phone inválido.   |
+      | Inquiry  | Campo Inquiry inválido. |
