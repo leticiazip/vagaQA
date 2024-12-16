@@ -1,5 +1,5 @@
 /// <reference types="cypress"/>
-import { Given, When, Then } from "cypress-cucumber-preprocessor/steps";
+import { Given, When, Then, And } from "cypress-cucumber-preprocessor/steps";
 import { faker } from '@faker-js/faker';
 
 let Nome = faker.name.firstName()
